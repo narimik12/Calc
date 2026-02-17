@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#2a2a40">
+<link rel="manifest" href="manifest.json">
+<title>3D Print Calc</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: white;
+}
+
+.container {
+    background: #2f2f45;
+    padding: 30px;
+    border-radius: 25px;
+    width: 95%;
+    max-width: 420px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    text-align: center;
+}
+
+h2 { margin-bottom: 20px; }
+
+button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-size: 16px;
+    margin: 8px 0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.primary { background: #4CAF50; color: white; }
+.secondary { background: #3a3a55; color: white; }
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border-radius: 14px;
+    border: none;
+    font-size: 16px;
+    background: #3a3a55;
+    color: white;
+}
+
+.result {
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+.highlight {
+    font-weight: bold;
+    font-size: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>3D Print Calculator</h2>
+
+    <button class="secondary" onclick="setPETG()">PETG (750 ₽/кг)</button>
+    <button class="secondary" onclick="setCustom()">Своя цена</button>
+
+    <input type="number" id="customPrice" placeholder="Цена за кг (₽)" style="display:none;">
+
+    <input type="number" id="weight" placeholder="Вес модели (граммы)">
+    <input type="number" id="printTime" placeholder="Время печати (минуты)">
+
+    <button class="primary" onclick="calculate()">Посчитать</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+let plasticCostPerGram = 0.75; // PETG 750₽ по умолчанию
+
+function setPETG() {
+    plasticCostPerGram = 0.75;
+    document.getElementById("customPrice").style.display = "none";
+}
+
+function setCustom() {
+    document.getElementById("customPrice").style.display = "block";
+}
+
+function calculate() {
+
+    let weight = parseFloat(document.getElementById("weight").value);
+    let printMinutes = parseFloat(document.getElementById("printTime").value);
+    let customPrice = parseFloat(document.getElementById("customPrice").value);
+
+    if (document.getElementById("customPrice").style.display === "block" && !isNaN(customPrice)) {
+        plasticCostPerGram = customPrice / 1000;
+    }
+
+    if (isNaN(weight) || isNaN(printMinutes) || weight <= 0 || printMinutes <= 0) {
+        document.getElementById("result").innerHTML = "Введите корректные данные!";
+        return;
+    }
+
+    let electricityPerHour = 0.2 * 8;
+    let wearPerHour = 20;
+    let profitPercent = 1.3;
+
+    let printHours = printMinutes / 60;
+
+    let plastic = weight * plasticCostPerGram;
+    let electricity = printHours * electricityPerHour;
+    let wear = printHours * wearPerHour;
+
+    let cost = plastic + electricity + wear;
+    let finalPrice = cost * profitPercent;
+
+    document.getElementById("result").innerHTML =
+        "Себестоимость: <span class='highlight'>" + cost.toFixed(2) + " ₽</span><br><br>" +
+        "Цена с прибылью: <span class='highlight'>" + finalPrice.toFixed(2) + " ₽</span><br><br>" +
+        "Цена за грамм: <span class='highlight'>" + (finalPrice / weight).toFixed(2) + " ₽</span>";
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+}
+</script>
+
+</body>
+</html>
+

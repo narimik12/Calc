@@ -1,0 +1,9 @@
+{
+  "name": "3D Print Calculator",
+  "short_name": "3D Calc",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#1e1e2f",
+  "theme_color": "#2a2a40",
+  "icons": []
+}
