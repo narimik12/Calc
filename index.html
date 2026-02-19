@@ -47,6 +47,10 @@ button {
 .primary { background: #4CAF50; color: white; }
 .secondary { background: #3a3a55; color: white; }
 
+.activeMaterial {
+    background: #4CAF50 !important;
+}
+
 input {
     width: 100%;
     padding: 14px;
@@ -73,23 +77,54 @@ input {
 <body>
 
 <div class="container">
-    <h2>3D Print Calculator</h2>
 
-    <button class="secondary" onclick="setPETG()">PETG (750 ₽/кг)</button>
-    <button class="secondary" onclick="setCustom()">Своя цена</button>
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
+    <div id="mainInterface">
 
-    <input type="number" id="customPrice" placeholder="Цена за кг (₽)" style="display:none;">
+        <h2>3D Print Calculator</h2>
 
-    <input type="number" id="weight" placeholder="Вес модели (граммы)">
-    <input type="number" id="printTime" placeholder="Время печати (минуты)">
+        <button class="secondary" onclick="setPETG()">PETG (750 ₽/кг)</button>
+        <button class="secondary" onclick="setCustom()">Своя цена</button>
 
-    <button class="primary" onclick="calculate()">Посчитать</button>
+        <input type="number" id="customPrice" placeholder="Цена за кг (₽)" style="display:none;">
 
-    <div class="result" id="result"></div>
+        <input type="number" id="weight" placeholder="Вес модели (граммы)">
+        <input type="number" id="printTime" placeholder="Время печати (минуты)">
+
+        <button class="primary" onclick="calculate()">Посчитать</button>
+
+        <div class="result" id="result"></div>
+
+        <hr style="margin:20px 0; opacity:0.3;">
+
+        <button class="secondary" onclick="openConverter()">Метры → Граммы</button>
+
+    </div>
+
+    <!-- КОНВЕРТЕР -->
+    <div id="converterInterface" style="display:none;">
+
+        <h2>Метры → Граммы</h2>
+
+        <button class="secondary" id="plaBtn" onclick="setPLA()">PLA</button>
+        <button class="secondary" id="petgBtn" onclick="setPETGConverter()">PETG</button>
+
+        <input type="number" id="meters" placeholder="Длина (метры)">
+
+        <button class="primary" onclick="convertMeters()">Рассчитать</button>
+
+        <div class="result" id="converterResult"></div>
+
+        <button class="secondary" onclick="goBack()">Назад</button>
+
+    </div>
+
 </div>
 
 <script>
-let plasticCostPerGram = 0.75; // PETG по умолчанию 750₽/кг
+
+let plasticCostPerGram = 0.75;
+let meterCoefficient = 2.98; // PLA по умолчанию
 
 function setPETG() {
     plasticCostPerGram = 0.75;
@@ -115,8 +150,8 @@ function calculate() {
         return;
     }
 
-    let servicePerHour = 62.5; // обслуживание 100 ₽/час
-    let profitPercent = 1.3;  // 30% прибыль
+    let servicePerHour = 62.5;
+    let profitPercent = 1.3;
 
     let printHours = printMinutes / 60;
 
@@ -131,6 +166,55 @@ function calculate() {
         "Цена с прибылью: <span class='highlight'>" + finalPrice.toFixed(2) + " ₽</span><br><br>" +
         "Цена за грамм: <span class='highlight'>" + (finalPrice / weight).toFixed(2) + " ₽</span>";
 }
+
+/* --- ПЕРЕКЛЮЧЕНИЕ ИНТЕРФЕЙСА --- */
+
+function openConverter() {
+    document.getElementById("mainInterface").style.display = "none";
+    document.getElementById("converterInterface").style.display = "block";
+}
+
+function goBack() {
+    document.getElementById("converterInterface").style.display = "none";
+    document.getElementById("mainInterface").style.display = "block";
+}
+
+/* --- ВЫБОР МАТЕРИАЛА --- */
+
+function setPLA() {
+    meterCoefficient = 2.98;
+
+    document.getElementById("plaBtn").classList.add("activeMaterial");
+    document.getElementById("petgBtn").classList.remove("activeMaterial");
+}
+
+function setPETGConverter() {
+    meterCoefficient = 3.05;
+
+    document.getElementById("petgBtn").classList.add("activeMaterial");
+    document.getElementById("plaBtn").classList.remove("activeMaterial");
+}
+
+/* --- КОНВЕРТАЦИЯ --- */
+
+function convertMeters() {
+
+    let meters = parseFloat(document.getElementById("meters").value);
+
+    if (isNaN(meters) || meters <= 0) {
+        document.getElementById("converterResult").innerHTML = "Введите корректные данные!";
+        return;
+    }
+
+    let grams = meters * meterCoefficient;
+
+    document.getElementById("converterResult").innerHTML =
+        "Вес: <span class='highlight'>" + grams.toFixed(2) + " г</span>";
+}
+
+/* PLA активен по умолчанию */
+setPLA();
+
 </script>
 
 <script>
